@@ -1,0 +1,18 @@
+{
+    "editor.rulers": [
+        120,
+        120
+    ],
+    "workbench.colorCustomizations": {
+        "editorIndentGuide.background1": "#ffffffd4",
+        "editorIndentGuide.activeBackground1": "#86ff6e"
+    },
+    "editor.lineHeight": 22,
+    "editor.fontSize": 14,
+    "editor.cursorStyle": "line",
+    "screencastMode.keyboardOptions": {
+        "showCommandGroups": true
+    },
+    "workbench.settings.useSplitJSON": false,
+    "dart.lineLength": 80
+}
