@@ -20,6 +20,7 @@ void main() {
       debugShowCheckedModeBanner: false,
       initialBinding: BindingsBuilder(() {
         // GetX ile controller'ları başlat
+        //heyhey
         Get.put(ContactListViewController());
         Get.put(LoginViewController());
         Get.put(EditContactViewController());
