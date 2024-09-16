@@ -1,19 +1,26 @@
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:t_yeni_tasarim/ui/controller/controller_contactlist.dart';
+import 'package:t_yeni_tasarim/ui/view/view_contact_list.dart';
 import '../controller/controller_contactdetail.dart';
 
 class ContactDetailView extends StatelessWidget {
-  final int id;
+  final int contactId;
 
-  const ContactDetailView({super.key, required this.id});
+  const ContactDetailView({super.key, required this.contactId});
 
   @override
   Widget build(BuildContext context) {
     final ContactDetailViewController controller =
         Get.put(ContactDetailViewController());
+    final ContactListViewController listController =
+        Get.find<ContactListViewController>();
 
-    controller.init(id);
+    // Controller API isteğini yapıyor ve veriyi getiriyor
+    controller.init(contactId);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,13 +28,11 @@ class ContactDetailView extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () {
-            Get.back();
+          onPressed: () async {
+            await listController.loadContacts();
+            Get.offAll(() => const ContactListView());
           },
         ),
-        actions: <Widget>[
-          Container(width: 48),
-        ],
       ),
       body: Obx(() {
         return Padding(
@@ -37,7 +42,7 @@ class ContactDetailView extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage(controller.imageUrl),
+                backgroundImage: _getProfileImage(controller),
               ),
               const SizedBox(height: 8),
               Text(
@@ -74,6 +79,22 @@ class ContactDetailView extends StatelessWidget {
         );
       }),
     );
+  }
+
+  /// Resmi Base64'ten dönüştürür ya da varsayılan resmi döndürür
+  ImageProvider _getProfileImage(ContactDetailViewController controller) {
+    if (controller.imageUrl.isNotEmpty) {
+      try {
+        Uint8List imageBytes = base64Decode(controller.imageUrl);
+        return MemoryImage(imageBytes);
+      } catch (e) {
+        return const AssetImage('assets/user-profile-default.png');
+      }
+    } else if (controller.imageFile.value != null) {
+      return FileImage(File(controller.imageFile.value!.path));
+    } else {
+      return const AssetImage('assets/user-profile-default.png');
+    }
   }
 }
 

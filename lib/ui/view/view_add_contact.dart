@@ -2,18 +2,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:t_yeni_tasarim/ui/view/view_contact_list.dart';
+import 'package:t_yeni_tasarim/ui/controller/controller.addcontactview.dart';
 import 'package:t_yeni_tasarim/ui/widgets/widgets_custom_text_field.dart';
 import 'package:t_yeni_tasarim/ui/widgets/widgets_rounded_button.dart';
-
-import '../controller/controller.addcontactview.dart';
 
 class AddContactView extends StatelessWidget {
   const AddContactView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final AddContactViewController controller = Get.put(AddContactViewController());
+    final AddContactViewController controller =
+        Get.put(AddContactViewController());
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -38,7 +37,8 @@ class AddContactView extends StatelessWidget {
                   radius: 40,
                   backgroundImage: controller.imageFile.value != null
                       ? FileImage(File(controller.imageFile.value!.path))
-                      : const AssetImage('assets/resim_ekle.png') as ImageProvider,
+                      : const AssetImage('assets/resim_ekle.png')
+                          as ImageProvider,
                   backgroundColor: Colors.grey[200],
                 );
               }),
@@ -77,7 +77,8 @@ class AddContactView extends StatelessWidget {
             const SizedBox(height: 16),
             Obx(() {
               return Column(
-                children: List.generate(controller.additionalPhones.length, (index) {
+                children:
+                    List.generate(controller.additionalPhones.length, (index) {
                   return Column(
                     children: [
                       CustomTextField(
@@ -102,8 +103,9 @@ class AddContactView extends StatelessWidget {
             RoundedButton(
               text: 'Kaydet',
               onPressed: () {
-                controller.saveContact();
-                Get.to(const ContactListView());
+                // Contact nesnesi oluşturuluyor
+                controller
+                    .saveContact(); // Parametre olarak Contact nesnesi gönderiliyor
               },
               textColor: Colors.white,
               textStyle: const TextStyle(
@@ -111,7 +113,7 @@ class AddContactView extends StatelessWidget {
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )
           ],
         ),
       ),

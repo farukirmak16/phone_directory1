@@ -5,6 +5,8 @@ class CustomTextField extends StatefulWidget {
   final bool obscureText;
   final String? hintText;
   final TextStyle? hintStyle;
+  final TextEditingController? controller;
+  final String? initialValue;
 
   const CustomTextField({
     super.key,
@@ -12,6 +14,8 @@ class CustomTextField extends StatefulWidget {
     this.obscureText = false,
     this.hintText,
     this.hintStyle,
+    this.controller,
+    this.initialValue,
   });
 
   @override
@@ -20,10 +24,27 @@ class CustomTextField extends StatefulWidget {
 
 class CustomTextFieldState extends State<CustomTextField> {
   bool _obscureText = true;
+  late TextEditingController _internalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalController =
+        widget.controller ?? TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _internalController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      controller: _internalController,
       onChanged: widget.onChanged,
       obscureText: _obscureText && widget.obscureText,
       decoration: InputDecoration(
@@ -34,7 +55,7 @@ class CustomTextFieldState extends State<CustomTextField> {
           borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: Colors.grey.withOpacity(0.08), // %8 opaklıkta gri
+        fillColor: Colors.grey.withOpacity(0.08),
         suffixIcon: widget.obscureText
             ? IconButton(
                 icon: Icon(
@@ -48,7 +69,8 @@ class CustomTextFieldState extends State<CustomTextField> {
                 },
               )
             : null,
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
       ),
     );
   }

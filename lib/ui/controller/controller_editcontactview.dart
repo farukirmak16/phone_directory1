@@ -1,38 +1,79 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../view/view_edit_contact.dart';
+import 'package:t_yeni_tasarim/core/model/contact.dart';
+import 'package:t_yeni_tasarim/core/service/contact_service.dart';
+import 'package:t_yeni_tasarim/core/service/auth_service.dart';
+import 'package:t_yeni_tasarim/ui/controller/controller_contactdetail.dart';
+import 'package:t_yeni_tasarim/ui/controller/controller_contactlist.dart';
+import 'package:t_yeni_tasarim/ui/view/view_contact_list.dart';
 
 class EditContactViewController extends GetxController {
-  var name = ''.obs;
-  var phone = ''.obs;
-  var email = ''.obs;
-  var imageFile = Rxn<XFile>();
-  var additionalPhones = <String>[].obs;
-  var canAddPhoneField = true.obs;
+  final ContactService contactService = Get.find<ContactService>();
 
+  final ContactListViewController listController =
+      Get.find<ContactListViewController>();
+  final AuthService authService = Get.find<AuthService>();
   final ImagePicker _picker = ImagePicker();
+  final RxInt id = 0.obs;
+  final RxString name = ''.obs;
+  final RxString phone = ''.obs;
+  final RxString email = ''.obs;
+  final RxString imageUrl = ''.obs;
+  final Rx<XFile?> imageFile = Rx<XFile?>(null);
+  final RxList<String> additionalPhones = <String>[].obs;
+  final RxBool canAddPhoneField = true.obs;
 
-  get contacts => null;
-
-  @override
-  void onInit() {
-    super.onInit();
-    loadContact();
-  }
-
-  Future<void> pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      imageFile.value = pickedFile;
+  void initializeData({
+    required int id,
+    required String name,
+    required String phone,
+    required String email,
+    required String imagePath,
+  }) {
+    this.id.value = id;
+    this.name.value = name;
+    this.phone.value = phone;
+    this.email.value = email;
+    imageUrl.value = imagePath;
+    if (imagePath.isNotEmpty) {
+      imageFile.value = XFile(imagePath);
     }
   }
 
+  Future<void> pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      imageFile.value = pickedFile;
+      final bytes = await imageFile.value?.readAsBytes();
+      imageUrl.value = bytes != null ? base64Encode(bytes) : "";
+      imageFile(pickedFile);
+    }
+  }
+
+  // Future<void> uploadImage(XFile imageFile) async {
+  //   try {
+  //     final bytes = await imageFile.readAsBytes();
+  //     final base64Image = base64Encode(bytes);
+
+  //     final uploadedImageUrl =
+  //         await contactService.uploadProfileImage(base64Image);
+  //     if (uploadedImageUrl != null) {
+  //       imageUrl.value = uploadedImageUrl;
+  //       Get.snackbar('Başarılı', 'Fotoğraf başarıyla yüklendi');
+  //     } else {
+  //       Get.snackbar('Hata', 'Fotoğraf yüklenemedi');
+  //     }
+  //   } catch (e) {
+  //     print('Fotoğraf yükleme hatası: $e');
+  //     Get.snackbar('Hata', 'Fotoğraf yüklenirken bir hata oluştu');
+  //   }
+  // }
+
   void addPhoneField() {
-    if (canAddPhoneField.value) {
+    if (additionalPhones.length < 2) {
       additionalPhones.add('');
-      canAddPhoneField.value = false;
+      canAddPhoneField.value = additionalPhones.length < 2;
     }
   }
 
@@ -42,29 +83,30 @@ class EditContactViewController extends GetxController {
     }
   }
 
-  Future<void> saveContact() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('name', name.value);
-    await prefs.setString('phone', phone.value);
-    await prefs.setString('email', email.value);
-    await prefs.setString('imageFile', imageFile.value?.path ?? '');
-    await prefs.setStringList('additionalPhones', additionalPhones);
-  }
+  Future<void> updateContact() async {
+    try {
+      final userId = await authService.getUserId();
+      final updatedContact = Contact(
+        id: id.value,
+        userId: userId ?? '',
+        name: name.value,
+        phoneNumber: phone.value,
+        email: email.value,
+        imageUrl: imageUrl.value,
+        // Eğer Contact modelinizde additionalPhones varsa, buraya ekleyin
+        // additionalPhones: additionalPhones,
+      );
 
-  Future<void> loadContact() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    name.value = prefs.getString('name') ?? '';
-    phone.value = prefs.getString('phone') ?? '';
-    email.value = prefs.getString('email') ?? '';
-    String? imagePath = prefs.getString('imageFile');
-    if (imagePath != null && imagePath.isNotEmpty) {
-      imageFile.value = XFile(imagePath);
+      await contactService.updateContact(id.value, updatedContact);
+
+      Get.snackbar('Başarılı', 'Kişi bilgileri güncellendi');
+      await listController.loadContacts();
+
+      Get.offAll(() => const ContactListView());
+    } catch (e) {
+      print('Kişi bilgileri güncellenirken hata oluştu: $e');
+      Get.snackbar(
+          'Hata', 'Kişi bilgileri güncellenemedi. Lütfen tekrar deneyin.');
     }
-    additionalPhones.value = prefs.getStringList('additionalPhones') ?? [];
-    canAddPhoneField.value = additionalPhones.isEmpty;
-  }
-
-  void editContact(name, phone, email, imagePath, param4) {
-    Get.to(() => const EditContactView(), arguments: {'name': name.value, 'phone': phone.value, 'email': email.value});
   }
 }

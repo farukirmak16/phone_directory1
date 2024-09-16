@@ -27,7 +27,8 @@ class CustomButton extends StatelessWidget {
       ),
       style: ElevatedButton.styleFrom(
         foregroundColor: isSocialButton ? Colors.black : Colors.white,
-        backgroundColor: isSocialButton ? Colors.white : Colors.blue, // Mavi renk
+        backgroundColor:
+            isSocialButton ? Colors.white : Colors.blue, // Mavi renk
         minimumSize: const Size(double.infinity, 50),
         padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 20.0),
       ),
