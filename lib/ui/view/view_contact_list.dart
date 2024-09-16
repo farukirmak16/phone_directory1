@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:t_yeni_tasarim/ui/controller/controller_contactdetail.dart';
 import 'package:t_yeni_tasarim/ui/controller/controller_contactlist.dart';
 import 'package:t_yeni_tasarim/ui/view/view_add_contact.dart';
 import 'package:t_yeni_tasarim/ui/view/view_contact_detail.dart';
-import 'package:t_yeni_tasarim/ui/view/view_login.dart';
-import 'package:t_yeni_tasarim/ui/widgets/widgets_alphabet_Sidebar.dart';
+import 'package:t_yeni_tasarim/ui/widgets/widgets_alphabet_sidebar.dart';
 import 'package:t_yeni_tasarim/ui/widgets/widgets_contact_list_item.dart';
 
 class ContactListView extends StatelessWidget {
@@ -14,9 +18,9 @@ class ContactListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ContactListViewController controller =
         Get.put(ContactListViewController());
-    final ScrollController scrollController = ScrollController();
 
-    // ignore: deprecated_member_use
+    final scrollController = ScrollController();
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -39,7 +43,7 @@ class ContactListView extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.logout_rounded, color: Colors.black54),
                 onPressed: () {
-                  Get.offAll(() => const LoginView());
+                  controller.logout();
                 },
               ),
             ],
@@ -53,29 +57,27 @@ class ContactListView extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Ara',
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 10),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey.shade400.withOpacity(0.1),
-                            suffixIcon: const Icon(Icons.search),
-                          ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Ara',
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
                         ),
+                        filled: true,
+                        fillColor: Colors.grey.shade400.withOpacity(0.1),
+                        suffixIcon: const Icon(Icons.search),
                       ),
+                      onChanged: (query) {
+                        // Arama işlevini buraya ekleyebilirsiniz
+                      },
                     ),
                   ),
-                  Expanded(
-                    child: Obx(() {
-                      return ListView.builder(
+                  Obx(() {
+                    return Expanded(
+                      child: ListView.builder(
                         controller: scrollController,
                         itemCount: controller.contacts.length,
                         itemBuilder: (context, index) {
@@ -105,11 +107,12 @@ class ContactListView extends StatelessWidget {
                                 ),
                               ContactListItem(
                                 id: contact.id,
+                                userId: contact.userId,
                                 name: contact.name,
                                 imageUrl: contact.imageUrl,
                                 onTap: () {
-                                  Get.to(
-                                      () => ContactDetailView(id: contact.id));
+                                  Get.to(() =>
+                                      ContactDetailView(contactId: contact.id));
                                 },
                               ),
                               Divider(
@@ -119,28 +122,30 @@ class ContactListView extends StatelessWidget {
                             ],
                           );
                         },
-                      );
-                    }),
-                  ),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
-            AlphabetSidebar(
-              onLetterTap: (letter) {
-                controller.setCurrentLetter(letter);
+            Obx(() {
+              return AlphabetSidebar(
+                onLetterTap: (letter) {
+                  controller.setCurrentLetter(letter);
 
-                int index = controller.contacts.indexWhere(
-                    (contact) => contact.name[0].toUpperCase() == letter);
-                if (index != -1) {
-                  scrollController.animateTo(
-                    index * 56.0, // 56.0, tahmini yükseklik
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              },
-              currentLetter: controller.currentLetter.value,
-            ),
+                  int index = controller.contacts.indexWhere(
+                      (contact) => contact.name[0].toUpperCase() == letter);
+                  if (index != -1) {
+                    scrollController.animateTo(
+                      index * 56.0, // 56.0, tahmini yükseklik
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                currentLetter: controller.currentLetter.value,
+              );
+            }),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(

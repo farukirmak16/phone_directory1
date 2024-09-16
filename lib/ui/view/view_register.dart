@@ -7,9 +7,7 @@ import 'package:t_yeni_tasarim/ui/widgets/widgets_custom_button.dart';
 import 'package:t_yeni_tasarim/ui/widgets/widgets_custom_text_field.dart';
 
 class RegisterView extends StatelessWidget {
-  const RegisterView({
-    super.key,
-  });
+  const RegisterView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +16,7 @@ class RegisterView extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: GetBuilder<RegisterViewController>(
-            init: RegisterViewController(), // Controller'ınızı başlatın
+            init: RegisterViewController(),
             builder: (controller) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -71,14 +69,14 @@ class RegisterView extends StatelessWidget {
                 CustomButton(
                   text: 'Google ile Kayıt Ol',
                   icon: 'assets/google_.png',
-                  onPressed: controller.registerWithGoogle,
+                  onPressed: () {}, // Şimdilik işlevsizlik için boş bırakın
                   isSocialButton: true,
                 ),
                 const SizedBox(height: 16),
                 CustomButton(
                   text: 'Facebook ile Kayıt Ol',
                   icon: 'assets/facebook_.png',
-                  onPressed: controller.registerWithFacebook,
+                  onPressed: () {}, // Şimdilik işlevsizlik için boş bırakın
                   isSocialButton: true,
                 ),
                 const SizedBox(height: 16),
@@ -101,7 +99,7 @@ class RegisterView extends StatelessWidget {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            Get.to(const LoginView());
+                            Get.to(() => const LoginView());
                           },
                       ),
                     ],

@@ -4,11 +4,12 @@ part 'contact.g.dart';
 
 @JsonSerializable()
 class Contact {
-  late final int id;
-  late final String name;
-  late final String phoneNumber;
-  late final String imageUrl;
-  late final String email;
+  int id;
+  String name;
+  String phoneNumber;
+  String imageUrl;
+  String email;
+  String userId; // userId alanı eklendi
 
   Contact({
     required this.id,
@@ -16,8 +17,10 @@ class Contact {
     required this.phoneNumber,
     required this.imageUrl,
     required this.email,
+    required this.userId, // userId alanı için de required eklendi
   });
 
-  factory Contact.fromJson(Map<String, dynamic> json) => _$ContactFromJson(json);
+  factory Contact.fromJson(Map<String, dynamic> json) =>
+      _$ContactFromJson(json);
   Map<String, dynamic> toJson() => _$ContactToJson(this);
 }
